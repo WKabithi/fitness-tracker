@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d0f14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>RISE — Morning Routine Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- ░░ LOADER ░░ -->
+  <div id="view-loader" class="view active">
+    <div class="loader-ring"></div>
+  </div>
+
+  <!-- ░░ LOGIN ░░ -->
+  <div id="view-login" class="view hidden">
+    <div class="auth-hero">
+      <span class="brand-eyebrow">YOUR MORNING</span>
+      <h1 class="brand-title">RISE</h1>
+      <p class="brand-sub">Build the routine. Own the day.</p>
+    </div>
+    <div class="card auth-card">
+      <h2 class="card-title">Sign In</h2>
+      <div id="login-error" class="error-msg hidden"></div>
+      <div class="form-group">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn btn-primary btn-full" id="btn-login">Sign In</button>
+      <p class="auth-switch">No account? <a href="#" id="goto-signup">Create one</a></p>
+    </div>
+  </div>
+
+  <!-- ░░ SIGNUP ░░ -->
+  <div id="view-signup" class="view hidden">
+    <div class="auth-hero">
+      <span class="brand-eyebrow">START HERE</span>
+      <h1 class="brand-title">RISE</h1>
+      <p class="brand-sub">Set up takes 60 seconds.</p>
+    </div>
+    <div class="card auth-card">
+      <h2 class="card-title">Create Account</h2>
+      <div id="signup-error" class="error-msg hidden"></div>
+      <div id="signup-success" class="success-msg hidden"></div>
+      <div class="form-group">
+        <label for="signup-email">Email</label>
+        <input type="email" id="signup-email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" placeholder="min 6 characters" autocomplete="new-password" />
+      </div>
+      <button class="btn btn-primary btn-full" id="btn-signup">Create Account</button>
+      <p class="auth-switch">Already have one? <a href="#" id="goto-login">Sign in</a></p>
+    </div>
+  </div>
+
+  <!-- ░░ ONBOARDING STEP 1 ░░ -->
+  <div id="view-onboard-1" class="view hidden">
+    <div class="onboard-header">
+      <div class="step-indicator">
+        <span class="step active">1</span>
+        <span class="step-line"></span>
+        <span class="step">2</span>
+        <span class="step-line"></span>
+        <span class="step">3</span>
+      </div>
+      <h2 class="onboard-title">WHEN DO YOU<br>NEED TO ARRIVE?</h2>
+      <p class="onboard-sub">We'll calculate your entire routine backwards from this time.</p>
+    </div>
+    <div class="card">
+      <div class="form-group">
+        <label for="arrival-time">Target Arrival Time</label>
+        <input type="time" id="arrival-time" value="09:00" />
+      </div>
+      <p class="time-preview" id="time-preview">Your routine will start at <strong>--:--</strong></p>
+    </div>
+    <button class="btn btn-primary btn-full btn-fixed" id="btn-ob1-next">Next: Set Workout Blocks →</button>
+  </div>
+
+  <!-- ░░ ONBOARDING STEP 2 ░░ -->
+  <div id="view-onboard-2" class="view hidden">
+    <div class="onboard-header">
+      <div class="step-indicator">
+        <span class="step done">✓</span>
+        <span class="step-line active"></span>
+        <span class="step active">2</span>
+        <span class="step-line"></span>
+        <span class="step">3</span>
+      </div>
+      <h2 class="onboard-title">YOUR MORNING<br>BLOCKS</h2>
+      <p class="onboard-sub">Reorder or edit any block. Times are auto-calculated.</p>
+    </div>
+    <div id="blocks-list" class="blocks-list"></div>
+    <button class="btn btn-primary btn-full btn-fixed" id="btn-ob2-next">Next: Add Breathwork Videos →</button>
+  </div>
+
+  <!-- ░░ ONBOARDING STEP 3 ░░ -->
+  <div id="view-onboard-3" class="view hidden">
+    <div class="onboard-header">
+      <div class="step-indicator">
+        <span class="step done">✓</span>
+        <span class="step-line active"></span>
+        <span class="step done">✓</span>
+        <span class="step-line active"></span>
+        <span class="step active">3</span>
+      </div>
+      <h2 class="onboard-title">30-DAY<br>BREATHWORK</h2>
+      <p class="onboard-sub">
+        Paste up to 30 YouTube URLs — one per line. Each maps to one day of your 30-day challenge.
+        <strong>Day 1 = URL 1</strong>, Day 2 = URL 2, and so on.
+      </p>
+    </div>
+    <div class="card">
+      <div class="form-group">
+        <label for="youtube-urls">
+          Breathwork Video URLs
+          <span class="label-count" id="url-count">0 / 30</span>
+        </label>
+        <textarea
+          id="youtube-urls"
+          rows="12"
+          placeholder="https://youtube.com/watch?v=abc123&#10;https://youtu.be/xyz456&#10;…one URL per line, up to 30"
+        ></textarea>
+      </div>
+      <div id="url-parse-preview" class="url-parse-preview hidden"></div>
+    </div>
+    <button class="btn btn-primary btn-full btn-fixed" id="btn-ob3-finish">Start My 30-Day Challenge 🚀</button>
+  </div>
+
+  <!-- ░░ DASHBOARD ░░ -->
+  <div id="view-dashboard" class="view hidden">
+
+    <!-- Header -->
+    <header class="dash-header">
+      <div>
+        <p class="dash-greeting" id="dash-greeting">Good morning</p>
+        <h1 class="dash-title">TODAY'S ROUTINE</h1>
+      </div>
+      <div class="dash-header-actions">
+        <button class="btn btn-ghost btn-icon" id="btn-logout" title="Sign out">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-cell">
+        <span class="stat-value" id="stat-day">—</span>
+        <span class="stat-label">Day / 30</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-cell">
+        <span class="stat-value" id="stat-streak">— 🔥</span>
+        <span class="stat-label">Streak</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-cell">
+        <span class="stat-value" id="stat-pct">0%</span>
+        <span class="stat-label">Today</span>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+
+    <!-- Detailed Stats Cards -->
+    <div class="stats-cards">
+      <div class="stat-card">
+        <div class="stat-card-icon">📊</div>
+        <div class="stat-card-value" id="stat-weekly-pct">—%</div>
+        <div class="stat-card-label">Weekly Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">✅</div>
+        <div class="stat-card-value" id="stat-total-completed">—</div>
+        <div class="stat-card-label">Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">↺</div>
+        <div class="stat-card-value" id="stat-total-resets">—</div>
+        <div class="stat-card-label">Resets</div>
+      </div>
+    </div>
+
+    <!-- 30-Day Calendar -->
+    <section class="calendar-section">
+      <h3 class="section-title">📅 30-DAY CALENDAR</h3>
+      <div class="calendar-legend">
+        <div class="legend-item"><span class="legend-dot completed"></span>Completed</div>
+        <div class="legend-item"><span class="legend-dot missed-continue"></span>Missed</div>
+        <div class="legend-item"><span class="legend-dot missed-restart"></span>Restarted</div>
+        <div class="legend-item"><span class="legend-dot future"></span>Future</div>
+      </div>
+      <div id="calendar-grid" class="calendar-grid" role="grid"></div>
+    </section>
+
+    <!-- Timeline -->
+    <div class="timeline" id="timeline" role="list" aria-label="Today's routine timeline"></div>
+
+    <!-- Breathwork Queue -->
+    <div class="dash-youtube-section">
+      <h3 class="section-title">🌬️ BREATHWORK QUEUE</h3>
+      <div id="dash-youtube-list" class="youtube-list"></div>
+    </div>
+
+  </div>
+
+  <!-- ░░ MISSED DAY MODAL ░░ -->
+  <div id="modal-missed-day" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-missed-title">
+    <div class="modal-card" role="document">
+      <div class="modal-icon">😴</div>
+      <h2 class="modal-title" id="modal-missed-title">YOU MISSED<br>A DAY</h2>
+      <p class="modal-body" id="modal-missed-body">
+        Yesterday's routine wasn't completed.<br>What would you like to do?
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-danger btn-full" id="btn-modal-restart">
+          ↺&nbsp; Restart from Day 1
+        </button>
+        <button class="btn btn-primary btn-full" id="btn-modal-continue">
+          Continue to Day <span id="modal-continue-day">—</span> →
+        </button>
+      </div>
+      <p class="modal-footnote" id="modal-reset-count"></p>
+    </div>
+  </div>
+
+  <!-- ░░ DAY DETAILS MODAL ░░ -->
+  <div id="modal-day-details" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-day-title">
+    <div class="modal-card modal-day-card" role="document">
+      <button class="modal-close" id="btn-close-day-modal" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div class="modal-day-header">
+        <span class="modal-day-icon" id="modal-day-icon">📅</span>
+        <h2 class="modal-title" id="modal-day-title">DAY —</h2>
+      </div>
+      <div class="modal-day-date" id="modal-day-date">—</div>
+      <div class="modal-day-status" id="modal-day-status">—</div>
+      <div class="modal-day-blocks" id="modal-day-blocks"></div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
