@@ -3,7 +3,7 @@
    ══════════════════════════════════════════════════════════ */
 
 // ─────────────────────────────────────────────
-// 1. SUPABASE CLIENT
+// 1. SUPABASE CLIENT; causes conflict
 // ─────────────────────────────────────────────
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
