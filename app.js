@@ -3,9 +3,9 @@
    ══════════════════════════════════════════════════════════ */
 
 // ─────────────────────────────────────────────
-// 1. SUPABASE CLIENT
+// 1. supabaseClient CLIENT
 // ─────────────────────────────────────────────
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabaseClient.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ─────────────────────────────────────────────
 // 2. DEFAULT BLOCKS
@@ -187,7 +187,7 @@ async function checkAuth() {
 }
 
 async function afterLogin() {
-  const { data: profile } = await supabase
+  const { data: profile } = await supabaseClient
     .from("profiles")
     .select("arrival_time, onboarding_complete")
     .eq("user_id", currentUser.id)
@@ -307,7 +307,7 @@ async function saveOnboarding() {
   try {
     const uid = currentUser.id;
 
-    const { error: profileError } = await supabase
+    const { error: profileError } = await supabaseClient
       .from("profiles")
       .upsert({
         user_id:             uid,
@@ -342,14 +342,14 @@ async function saveOnboarding() {
       await supabaseClient.from("youtube_queue").insert(queueToInsert);
     }
 
-    const { data: existingCycle } = await supabase
+    const { data: existingCycle } = await supabaseClient
       .from("challenge_cycles")
       .select("id")
       .eq("user_id", uid)
       .maybeSingle();
 
     if (!existingCycle) {
-      const { error: cycleError } = await supabase
+      const { error: cycleError } = await supabaseClient
         .from("challenge_cycles")
         .insert({ user_id: uid, start_date: dateKey(), total_resets: 0 });
       if (cycleError) throw cycleError;
@@ -369,7 +369,7 @@ async function saveOnboarding() {
 // 9. CYCLE DAY TRACKING
 // ─────────────────────────────────────────────
 async function getCurrentCycleDay() {
-  const { data: cycle, error } = await supabase
+  const { data: cycle, error } = await supabaseClient
     .from("challenge_cycles")
     .select("id, start_date, total_resets")
     .eq("user_id", currentUser.id)
@@ -402,7 +402,7 @@ async function checkMissedDay(cycleDay) {
   const yesterday = dateKey(-1);
   const uid       = currentUser.id;
 
-  const { data: yesterdayRows } = await supabase
+  const { data: yesterdayRows } = await supabaseClient
     .from("daily_completions")
     .select("block_id")
     .eq("user_id", uid)
@@ -410,7 +410,7 @@ async function checkMissedDay(cycleDay) {
 
   const hadCompletions = yesterdayRows && yesterdayRows.length > 0;
 
-  const { data: summary } = await supabase
+  const { data: summary } = await supabaseClient
     .from("daily_summary")
     .select("is_complete")
     .eq("user_id", uid)
@@ -457,14 +457,14 @@ function closeMissedDayModal() {
 async function handleRestart() {
   closeMissedDayModal();
   try {
-    const { data: cycle } = await supabase
+    const { data: cycle } = await supabaseClient
       .from("challenge_cycles")
       .select("id, total_resets")
       .eq("user_id", currentUser.id)
       .maybeSingle();
 
     if (cycle) {
-      await supabase
+      await supabaseClient
         .from("challenge_cycles")
         .update({
           start_date:   dateKey(),
@@ -481,7 +481,7 @@ async function handleRestart() {
 async function handleContinue() {
   closeMissedDayModal();
   try {
-    await supabase
+    await supabaseClient
       .from("daily_summary")
       .upsert({
         user_id:     currentUser.id,
@@ -609,7 +609,7 @@ function calculateSchedule(arrivalHHMM, blocks) {
 // ─────────────────────────────────────────────
 async function saveDailyProgress(blockId, completed) {
   if (completed) {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from("daily_completions")
       .upsert({
         user_id:  currentUser.id,
@@ -618,7 +618,7 @@ async function saveDailyProgress(blockId, completed) {
       }, { onConflict: "user_id,block_id,date" });
     if (error) throw error;
   } else {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from("daily_completions")
       .delete()
       .eq("user_id",  currentUser.id)
@@ -664,7 +664,7 @@ async function markBlockComplete(blockId) {
 // 17. STATS CALCULATIONS
 // ─────────────────────────────────────────────
 async function fetchCompletionDates() {
-  const { data } = await supabase
+  const { data } = await supabaseClient
     .from("daily_completions")
     .select("date")
     .eq("user_id", currentUser.id)
@@ -682,7 +682,7 @@ async function fetchCompletionDates() {
  * Breaks on any missed day.
  */
 async function calculateStreak() {
-  const { data } = await supabase
+  const { data } = await supabaseClient
     .from("daily_summary")
     .select("date, is_complete")
     .eq("user_id", currentUser.id)
@@ -726,7 +726,7 @@ async function getWeeklyStats() {
     dates.push(dateKey(-i));
   }
 
-  const { data } = await supabase
+  const { data } = await supabaseClient
     .from("daily_summary")
     .select("date, is_complete")
     .eq("user_id", currentUser.id)
@@ -741,7 +741,7 @@ async function getWeeklyStats() {
  * Total completed days this cycle (from cycle start_date to today).
  */
 async function getTotalCompletedDays(startDate) {
-  const { data } = await supabase
+  const { data } = await supabaseClient
     .from("daily_summary")
     .select("date, is_complete")
     .eq("user_id", currentUser.id)
@@ -827,7 +827,7 @@ async function renderCalendar(cycleDay, startDate) {
   container.innerHTML = "";
 
   // Fetch all daily_summary rows for this cycle
-  const { data: summaries } = await supabase
+  const { data: summaries } = await supabaseClient
     .from("daily_summary")
     .select("date, is_complete, was_missed")
     .eq("user_id", currentUser.id)
@@ -947,7 +947,7 @@ async function showDayDetails(day, date, state, summary) {
     "Future Day";
 
   // Fetch completions for this day
-  const { data: dayCompletions } = await supabase
+  const { data: dayCompletions } = await supabaseClient
     .from("daily_completions")
     .select("block_id")
     .eq("user_id", currentUser.id)
@@ -956,7 +956,7 @@ async function showDayDetails(day, date, state, summary) {
   const completedIds = new Set((dayCompletions || []).map(c => c.block_id));
 
   // Fetch blocks
-  const { data: blocks } = await supabase
+  const { data: blocks } = await supabaseClient
     .from("routine_blocks")
     .select("*")
     .eq("user_id", currentUser.id)
