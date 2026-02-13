@@ -3,9 +3,9 @@
    ══════════════════════════════════════════════════════════ */
 
 // ─────────────────────────────────────────────
-// 1. SUPABASE CLIENT; causes conflict
+// 1. SUPABASE CLIENT
 // ─────────────────────────────────────────────
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabaseClient.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ─────────────────────────────────────────────
 // 2. DEFAULT BLOCKS
@@ -140,7 +140,7 @@ async function login() {
 
   const btn = document.getElementById("btn-login");
   setButtonLoading(btn, true);
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
   setButtonLoading(btn, false);
 
   if (error) { showError("login-error", error.message); return; }
@@ -159,7 +159,7 @@ async function signup() {
 
   const btn = document.getElementById("btn-signup");
   setButtonLoading(btn, true);
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
   setButtonLoading(btn, false);
 
   if (error) { showError("signup-error", error.message); return; }
@@ -174,14 +174,14 @@ async function signup() {
 }
 
 async function logout() {
-  await supabase.auth.signOut();
+  await supabaseClient.auth.signOut();
   currentUser = null;
   showView("login");
 }
 
 async function checkAuth() {
   showView("loader");
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) { currentUser = session.user; await afterLogin(); }
   else         { showView("login"); }
 }
@@ -317,29 +317,29 @@ async function saveOnboarding() {
       }, { onConflict: "user_id" });
     if (profileError) throw profileError;
 
-    await supabase.from("routine_blocks").delete().eq("user_id", uid);
+    await supabaseClient.from("routine_blocks").delete().eq("user_id", uid);
     const blocksToInsert = onboardBlocks.map((b, i) => ({
       user_id: uid, name: b.name, duration_min: b.duration_min,
       type: b.type, reps: b.reps, sets: b.sets, reps_per_set: b.reps_per_set, order: i,
     }));
-    const { error: blocksError } = await supabase.from("routine_blocks").insert(blocksToInsert);
+    const { error: blocksError } = await supabaseClient.from("routine_blocks").insert(blocksToInsert);
     if (blocksError) throw blocksError;
 
     const textarea   = document.getElementById("youtube-urls");
     const parsedURLs = parseYouTubeURLs(textarea.value).filter(p => p.valid);
 
-    await supabase.from("breathwork_videos").delete().eq("user_id", uid);
-    await supabase.from("youtube_queue").delete().eq("user_id", uid);
+    await supabaseClient.from("breathwork_videos").delete().eq("user_id", uid);
+    await supabaseClient.from("youtube_queue").delete().eq("user_id", uid);
 
     if (parsedURLs.length > 0) {
       const videosToInsert = parsedURLs.map(p => ({
         user_id: uid, video_id: p.videoId, url: p.rawUrl, day_number: p.dayNumber,
       }));
-      const { error: vidError } = await supabase.from("breathwork_videos").insert(videosToInsert);
+      const { error: vidError } = await supabaseClient.from("breathwork_videos").insert(videosToInsert);
       if (vidError) throw vidError;
 
       const queueToInsert = parsedURLs.map((p, i) => ({ user_id: uid, url: p.rawUrl, order: i }));
-      await supabase.from("youtube_queue").insert(queueToInsert);
+      await supabaseClient.from("youtube_queue").insert(queueToInsert);
     }
 
     const { data: existingCycle } = await supabase
@@ -434,7 +434,7 @@ function openMissedDayModal(currentCycleDay) {
 
   if (continueDay) continueDay.textContent = currentCycleDay;
 
-  supabase.from("challenge_cycles")
+  supabaseClient.from("challenge_cycles")
     .select("total_resets")
     .eq("user_id", currentUser.id)
     .maybeSingle()
@@ -644,7 +644,7 @@ async function markBlockComplete(blockId) {
   try {
     await saveDailyProgress(blockId, nowDone);
     if (dashState.completedIds.size === dashState.totalBlocks) {
-      await supabase.from("daily_summary").upsert({
+      await supabaseClient.from("daily_summary").upsert({
         user_id:     currentUser.id,
         date:        dashState.todayKey,
         is_complete: true,
@@ -1005,11 +1005,11 @@ async function loadDashboard() {
     streak,
     weeklyPct,
   ] = await Promise.all([
-    supabase.from("routine_blocks").select("*").eq("user_id", currentUser.id).order("order", { ascending: true }),
-    supabase.from("profiles").select("arrival_time").eq("user_id", currentUser.id).maybeSingle(),
-    supabase.from("daily_completions").select("block_id").eq("user_id", currentUser.id).eq("date", dashState.todayKey),
-    supabase.from("youtube_queue").select("url, order").eq("user_id", currentUser.id).order("order", { ascending: true }),
-    supabase.from("breathwork_videos").select("video_id, day_number, url").eq("user_id", currentUser.id).order("day_number", { ascending: true }),
+    supabaseClient.from("routine_blocks").select("*").eq("user_id", currentUser.id).order("order", { ascending: true }),
+    supabaseClient.from("profiles").select("arrival_time").eq("user_id", currentUser.id).maybeSingle(),
+    supabaseClient.from("daily_completions").select("block_id").eq("user_id", currentUser.id).eq("date", dashState.todayKey),
+    supabaseClient.from("youtube_queue").select("url, order").eq("user_id", currentUser.id).order("order", { ascending: true }),
+    supabaseClient.from("breathwork_videos").select("video_id, day_number, url").eq("user_id", currentUser.id).order("day_number", { ascending: true }),
     getCurrentCycleDay(),
     calculateStreak(),
     getWeeklyStats(),
@@ -1223,7 +1223,7 @@ function initEventListeners() {
 // ─────────────────────────────────────────────
 // 25. AUTH STATE LISTENER
 // ─────────────────────────────────────────────
-supabase.auth.onAuthStateChange(async (event, session) => {
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
   if (event === "SIGNED_OUT") { currentUser = null; showView("login"); }
 });
 
