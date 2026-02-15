@@ -158,7 +158,7 @@ async function login() {
 
   const btn = document.getElementById("btn-login");
   setButtonLoading(btn, true);
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
   setButtonLoading(btn, false);
 
   if (error) { showError("login-error", error.message); return; }
@@ -177,7 +177,7 @@ async function signup() {
 
   const btn = document.getElementById("btn-signup");
   setButtonLoading(btn, true);
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
   setButtonLoading(btn, false);
 
   if (error) { showError("signup-error", error.message); return; }
@@ -192,7 +192,7 @@ async function signup() {
 }
 
 async function logout() {
-  await supabase.auth.signOut();
+  await supabaseClient.auth.signOut();
   currentUser = null;
   window.location.hash = ''; // Clear hash
   showView("login");
@@ -200,7 +200,7 @@ async function logout() {
 
 async function checkAuth() {
   showView("loader");
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) { currentUser = session.user; await afterLogin(); }
   else         { showView("login"); }
 }
@@ -2858,7 +2858,7 @@ async function sendPartnerInvite() {
   
   try {
     // Find user by email
-    const { data: { users }, error: searchError } = await supabase.auth.admin.listUsers();
+    const { data: { users }, error: searchError } = await supabaseClient.auth.admin.listUsers();
     
     if (searchError) {
       // Fallback: try to create invite without verification
@@ -3990,7 +3990,7 @@ async function changePassword() {
   }
   
   try {
-    const { error } = await supabase.auth.updateUser({
+    const { error } = await supabaseClient.auth.updateUser({
       password: newPassword
     });
     
@@ -4051,10 +4051,10 @@ async function deleteAccount() {
     ]);
     
     // Delete auth user (this will cascade delete remaining data)
-    await supabase.auth.admin.deleteUser(userId);
+    await supabaseClient.auth.admin.deleteUser(userId);
     
     // Sign out
-    await supabase.auth.signOut();
+    await supabaseClient.auth.signOut();
     
   } catch (error) {
     console.error('Error deleting account:', error);
@@ -4075,7 +4075,7 @@ function closeDeleteAccountModal() {
 // ─────────────────────────────────────────────
 // 27. AUTH STATE LISTENER
 // ─────────────────────────────────────────────
-supabase.auth.onAuthStateChange(async (event, session) => {
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
   if (event === "SIGNED_OUT") { 
     currentUser = null; 
     window.location.hash = '';
