@@ -328,7 +328,7 @@ async function saveOnboarding() {
   try {
     const uid = currentUser.id;
 
-    const { error: profileError } = await supabase
+    const { error: profileError } = await supabaseClient
       .from("profiles")
       .upsert({
         user_id:             uid,
@@ -363,14 +363,14 @@ async function saveOnboarding() {
       await supabaseClient.from("youtube_queue").insert(queueToInsert);
     }
 
-    const { data: existingCycle } = await supabase
+    const { data: existingCycle } = await supabaseClient
       .from("challenge_cycles")
       .select("id")
       .eq("user_id", uid)
       .maybeSingle();
 
     if (!existingCycle) {
-      const { error: cycleError } = await supabase
+      const { error: cycleError } = await supabaseClient
         .from("challenge_cycles")
         .insert({ user_id: uid, start_date: dateKey(), total_resets: 0 });
       if (cycleError) throw cycleError;
@@ -396,7 +396,7 @@ async function saveOnboarding() {
 // 9. CYCLE DAY TRACKING
 // ─────────────────────────────────────────────
 async function getCurrentCycleDay() {
-  const { data: cycle, error } = await supabase
+  const { data: cycle, error } = await supabaseClient
     .from("challenge_cycles")
     .select("id, start_date, total_resets")
     .eq("user_id", currentUser.id)
@@ -429,7 +429,7 @@ async function checkMissedDay(cycleDay) {
   const yesterday = dateKey(-1);
   const uid       = currentUser.id;
 
-  const { data: yesterdayRows } = await supabase
+  const { data: yesterdayRows } = await supabaseClient
     .from("daily_completions")
     .select("block_id")
     .eq("user_id", uid)
@@ -437,7 +437,7 @@ async function checkMissedDay(cycleDay) {
 
   const hadCompletions = yesterdayRows && yesterdayRows.length > 0;
 
-  const { data: summary } = await supabase
+  const { data: summary } = await supabaseClient
     .from("daily_summary")
     .select("is_complete")
     .eq("user_id", uid)
@@ -484,14 +484,14 @@ function closeMissedDayModal() {
 async function handleRestart() {
   closeMissedDayModal();
   try {
-    const { data: cycle } = await supabase
+    const { data: cycle } = await supabaseClient
       .from("challenge_cycles")
       .select("id, total_resets")
       .eq("user_id", currentUser.id)
       .maybeSingle();
 
     if (cycle) {
-      await supabase
+      await supabaseClient
         .from("challenge_cycles")
         .update({
           start_date:   dateKey(),
@@ -508,7 +508,7 @@ async function handleRestart() {
 async function handleContinue() {
   closeMissedDayModal();
   try {
-    await supabase
+    await supabaseClient
       .from("daily_summary")
       .upsert({
         user_id:     currentUser.id,
@@ -636,7 +636,7 @@ function calculateSchedule(arrivalHHMM, blocks) {
 // ─────────────────────────────────────────────
 async function saveDailyProgress(blockId, completed) {
   if (completed) {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from("daily_completions")
       .upsert({
         user_id:  currentUser.id,
@@ -645,7 +645,7 @@ async function saveDailyProgress(blockId, completed) {
       }, { onConflict: "user_id,block_id,date" });
     if (error) throw error;
   } else {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from("daily_completions")
       .delete()
       .eq("user_id",  currentUser.id)
@@ -691,7 +691,7 @@ async function markBlockComplete(blockId) {
 // 17. STATS CALCULATIONS
 // ─────────────────────────────────────────────
 async function fetchCompletionDates() {
-  const { data } = await supabase
+  const { data } = await supabaseClient
     .from("daily_completions")
     .select("date")
     .eq("user_id", currentUser.id)
@@ -709,7 +709,7 @@ async function fetchCompletionDates() {
  * Breaks on any missed day.
  */
 async function calculateStreak() {
-  const { data } = await supabase
+  const { data } = await supabaseClient
     .from("daily_summary")
     .select("date, is_complete")
     .eq("user_id", currentUser.id)
@@ -753,7 +753,7 @@ async function getWeeklyStats() {
     dates.push(dateKey(-i));
   }
 
-  const { data } = await supabase
+  const { data } = await supabaseClient
     .from("daily_summary")
     .select("date, is_complete")
     .eq("user_id", currentUser.id)
@@ -768,7 +768,7 @@ async function getWeeklyStats() {
  * Total completed days this cycle (from cycle start_date to today).
  */
 async function getTotalCompletedDays(startDate) {
-  const { data } = await supabase
+  const { data } = await supabaseClient
     .from("daily_summary")
     .select("date, is_complete")
     .eq("user_id", currentUser.id)
@@ -854,7 +854,7 @@ async function renderCalendar(cycleDay, startDate) {
   container.innerHTML = "";
 
   // Fetch all daily_summary rows for this cycle
-  const { data: summaries } = await supabase
+  const { data: summaries } = await supabaseClient
     .from("daily_summary")
     .select("date, is_complete, was_missed")
     .eq("user_id", currentUser.id)
@@ -974,7 +974,7 @@ async function showDayDetails(day, date, state, summary) {
     "Future Day";
 
   // Fetch completions for this day
-  const { data: dayCompletions } = await supabase
+  const { data: dayCompletions } = await supabaseClient
     .from("daily_completions")
     .select("block_id")
     .eq("user_id", currentUser.id)
@@ -983,7 +983,7 @@ async function showDayDetails(day, date, state, summary) {
   const completedIds = new Set((dayCompletions || []).map(c => c.block_id));
 
   // Fetch blocks
-  const { data: blocks } = await supabase
+  const { data: blocks } = await supabaseClient
     .from("routine_blocks")
     .select("*")
     .eq("user_id", currentUser.id)
@@ -1518,7 +1518,7 @@ let blockEditorState = {
 
 async function loadTemplates() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('routine_templates')
       .select('*')
       .eq('user_id', currentUser.id)
@@ -1741,7 +1741,7 @@ async function saveTemplate() {
     
     if (templateEditorState.isEditing) {
       // Update existing
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('routine_templates')
         .update(templateData)
         .eq('id', templateEditorState.editingId);
@@ -1749,7 +1749,7 @@ async function saveTemplate() {
       if (error) throw error;
     } else {
       // Create new
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('routine_templates')
         .insert([templateData]);
       
@@ -1768,7 +1768,7 @@ async function saveTemplate() {
 
 async function editTemplate(templateId) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('routine_templates')
       .select('*')
       .eq('id', templateId)
@@ -1905,7 +1905,7 @@ function closeApplyTemplateModal() {
 async function applyTemplate(templateId) {
   try {
     // Get template
-    const { data: template, error: templateError } = await supabase
+    const { data: template, error: templateError } = await supabaseClient
       .from('routine_templates')
       .select('*')
       .eq('id', templateId)
@@ -1917,7 +1917,7 @@ async function applyTemplate(templateId) {
     await saveCurrentRoutineAsTemplate();
     
     // Delete existing blocks
-    await supabase
+    await supabaseClient
       .from('routine_blocks')
       .delete()
       .eq('user_id', currentUser.id);
@@ -1934,12 +1934,12 @@ async function applyTemplate(templateId) {
       order: index
     }));
     
-    await supabase
+    await supabaseClient
       .from('routine_blocks')
       .insert(newBlocks);
     
     // Update arrival time in profile
-    await supabase
+    await supabaseClient
       .from('profiles')
       .update({ arrival_time: template.arrival_time })
       .eq('user_id', currentUser.id);
@@ -1962,7 +1962,7 @@ async function applyTemplate(templateId) {
 async function saveCurrentRoutineAsTemplate() {
   try {
     // Get current blocks
-    const { data: blocks } = await supabase
+    const { data: blocks } = await supabaseClient
       .from('routine_blocks')
       .select('*')
       .eq('user_id', currentUser.id)
@@ -1971,7 +1971,7 @@ async function saveCurrentRoutineAsTemplate() {
     if (!blocks || blocks.length === 0) return;
     
     // Get current profile
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseClient
       .from('profiles')
       .select('arrival_time')
       .eq('user_id', currentUser.id)
@@ -1990,7 +1990,7 @@ async function saveCurrentRoutineAsTemplate() {
     // Create template with timestamp
     const templateName = `Routine ${new Date().toLocaleDateString()}`;
     
-    await supabase
+    await supabaseClient
       .from('routine_templates')
       .insert([{
         user_id: currentUser.id,
@@ -2025,7 +2025,7 @@ function closeDeleteTemplateModal() {
 
 async function deleteTemplate(templateId) {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('routine_templates')
       .delete()
       .eq('id', templateId);
@@ -2044,7 +2044,7 @@ async function deleteTemplate(templateId) {
 async function autoSaveFirstTemplate() {
   try {
     // Check if user already has templates
-    const { data: existing } = await supabase
+    const { data: existing } = await supabaseClient
       .from('routine_templates')
       .select('id')
       .eq('user_id', currentUser.id)
@@ -2063,7 +2063,7 @@ async function autoSaveFirstTemplate() {
     }));
     
     // Save as "My First Routine"
-    await supabase
+    await supabaseClient
       .from('routine_templates')
       .insert([{
         user_id: currentUser.id,
@@ -2090,7 +2090,7 @@ async function loadHistoryPage() {
 async function loadLifetimeStats() {
   try {
     // Get all cycles
-    const { data: cycles } = await supabase
+    const { data: cycles } = await supabaseClient
       .from('challenge_cycles')
       .select('*')
       .eq('user_id', currentUser.id);
@@ -2115,7 +2115,7 @@ async function loadLifetimeStats() {
     // Calculate total days completed across all cycles
     let totalDays = 0;
     for (const cycle of cycles) {
-      const { data: summaries } = await supabase
+      const { data: summaries } = await supabaseClient
         .from('daily_summary')
         .select('is_complete')
         .eq('user_id', currentUser.id)
@@ -2143,7 +2143,7 @@ async function loadLifetimeStats() {
 
 async function calculateLongestStreakAllTime() {
   try {
-    const { data: summaries } = await supabase
+    const { data: summaries } = await supabaseClient
       .from('daily_summary')
       .select('date, is_complete')
       .eq('user_id', currentUser.id)
@@ -2172,7 +2172,7 @@ async function calculateLongestStreakAllTime() {
 
 async function loadCycles() {
   try {
-    const { data: cycles, error } = await supabase
+    const { data: cycles, error } = await supabaseClient
       .from('challenge_cycles')
       .select(`
         *,
@@ -2222,7 +2222,7 @@ async function enrichCycleData(cycle) {
   try {
     // Calculate days completed
     const endDate = cycle.end_date || dateKey();
-    const { data: summaries } = await supabase
+    const { data: summaries } = await supabaseClient
       .from('daily_summary')
       .select('is_complete')
       .eq('user_id', currentUser.id)
@@ -2233,7 +2233,7 @@ async function enrichCycleData(cycle) {
     cycle.days_completed = completedDays;
     
     // Calculate streak for this cycle
-    const { data: allSummaries } = await supabase
+    const { data: allSummaries } = await supabaseClient
       .from('daily_summary')
       .select('date, is_complete')
       .eq('user_id', currentUser.id)
@@ -2400,7 +2400,7 @@ async function renderCycleCalendar(cycle, container) {
   
   // Get daily completions for this cycle
   const endDate = cycle.end_date || dateKey();
-  const { data: summaries } = await supabase
+  const { data: summaries } = await supabaseClient
     .from('daily_summary')
     .select('date, is_complete, was_missed')
     .eq('user_id', currentUser.id)
@@ -2477,7 +2477,7 @@ async function renderCycleCalendar(cycle, container) {
 async function showHistoricalDayDetails(dayKey, dayNumber) {
   try {
     // Get daily completions for this day
-    const { data: completions } = await supabase
+    const { data: completions } = await supabaseClient
       .from('daily_completions')
       .select(`
         *,
@@ -2487,7 +2487,7 @@ async function showHistoricalDayDetails(dayKey, dayNumber) {
       .eq('date', dayKey);
     
     // Get all blocks for that day
-    const { data: allBlocks } = await supabase
+    const { data: allBlocks } = await supabaseClient
       .from('routine_blocks')
       .select('*')
       .eq('user_id', currentUser.id)
@@ -2568,7 +2568,7 @@ async function loadPartnersPage() {
 
 async function loadPartner() {
   try {
-    const { data: pair, error } = await supabase
+    const { data: pair, error } = await supabaseClient
       .from('accountability_pairs')
       .select(`
         *,
@@ -2615,7 +2615,7 @@ async function loadPartner() {
 async function loadPartnerStats(partnerId) {
   try {
     // Get partner's current cycle
-    const { data: cycle } = await supabase
+    const { data: cycle } = await supabaseClient
       .from('challenge_cycles')
       .select('*')
       .eq('user_id', partnerId)
@@ -2637,7 +2637,7 @@ async function loadPartnerStats(partnerId) {
     const cycleDay = Math.min(Math.max(diffDays + 1, 1), 30);
     
     // Get today's completion
-    const { data: summary } = await supabase
+    const { data: summary } = await supabaseClient
       .from('daily_summary')
       .select('*')
       .eq('user_id', partnerId)
@@ -2648,7 +2648,7 @@ async function loadPartnerStats(partnerId) {
     const todayPct = summary?.completion_pct || 0;
     
     // Calculate current streak
-    const { data: summaries } = await supabase
+    const { data: summaries } = await supabaseClient
       .from('daily_summary')
       .select('date, is_complete')
       .eq('user_id', partnerId)
@@ -2689,7 +2689,7 @@ async function loadPartnerStats(partnerId) {
 
 async function loadPendingInvites() {
   try {
-    const { data: invites } = await supabase
+    const { data: invites } = await supabaseClient
       .from('accountability_pairs')
       .select(`
         *,
@@ -2746,7 +2746,7 @@ async function loadPendingInvites() {
 
 async function loadNotifications() {
   try {
-    const { data: notifications } = await supabase
+    const { data: notifications } = await supabaseClient
       .from('notifications')
       .select('*')
       .eq('user_id', currentUser.id)
@@ -2875,7 +2875,7 @@ async function sendPartnerInvite() {
     }
     
     // Check if already partners or pending
-    const { data: existing } = await supabase
+    const { data: existing } = await supabaseClient
       .from('accountability_pairs')
       .select('*')
       .or(`and(user_id.eq.${currentUser.id},partner_id.eq.${partnerUser.id}),and(user_id.eq.${partnerUser.id},partner_id.eq.${currentUser.id})`);
@@ -2886,7 +2886,7 @@ async function sendPartnerInvite() {
     }
     
     // Create invite
-    const { error: insertError } = await supabase
+    const { error: insertError } = await supabaseClient
       .from('accountability_pairs')
       .insert([{
         user_id: currentUser.id,
@@ -2913,7 +2913,7 @@ async function sendPartnerInvite() {
 
 async function acceptInvite(inviteId) {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('accountability_pairs')
       .update({ status: 'accepted', accepted_at: new Date().toISOString() })
       .eq('id', inviteId);
@@ -2930,7 +2930,7 @@ async function acceptInvite(inviteId) {
 
 async function declineInvite(inviteId) {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('accountability_pairs')
       .delete()
       .eq('id', inviteId);
@@ -2961,7 +2961,7 @@ function closeRemovePartnerModal() {
 
 async function removePartner() {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('accountability_pairs')
       .delete()
       .or(`user_id.eq.${currentUser.id},partner_id.eq.${currentUser.id}`)
@@ -2980,7 +2980,7 @@ async function removePartner() {
 
 async function markNotificationRead(notificationId) {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('notifications')
       .update({ is_read: true })
       .eq('id', notificationId);
@@ -3009,7 +3009,7 @@ async function loadPlaylists() {
 
 async function loadPersonalPlaylists() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('breathwork_playlists')
       .select('*')
       .eq('user_id', currentUser.id)
@@ -3025,7 +3025,7 @@ async function loadPersonalPlaylists() {
 
 async function loadCommunityPlaylists(searchTerm = '') {
   try {
-    let query = supabase
+    let query = supabaseClient
       .from('breathwork_playlists')
       .select(`
         *,
@@ -3291,14 +3291,14 @@ async function savePlaylist() {
     };
     
     if (playlistEditorState.isEditing) {
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('breathwork_playlists')
         .update(playlistData)
         .eq('id', playlistEditorState.editingId);
       
       if (error) throw error;
     } else {
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('breathwork_playlists')
         .insert([playlistData]);
       
@@ -3316,7 +3316,7 @@ async function savePlaylist() {
 
 async function editPlaylist(playlistId) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('breathwork_playlists')
       .select('*')
       .eq('id', playlistId)
@@ -3383,14 +3383,14 @@ async function copyPlaylistToPersonal(playlist) {
       videos: playlist.videos
     };
     
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('breathwork_playlists')
       .insert([newPlaylist]);
     
     if (error) throw error;
     
     // Increment times_used for the original
-    await supabase
+    await supabaseClient
       .from('breathwork_playlists')
       .update({ times_used: (playlist.times_used || 0) + 1 })
       .eq('id', playlist.id);
@@ -3429,7 +3429,7 @@ function closeDeletePlaylistModal() {
 
 async function deletePlaylist(playlistId) {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('breathwork_playlists')
       .delete()
       .eq('id', playlistId);
@@ -3475,7 +3475,7 @@ function switchPlaylistTab(tabName) {
 async function autoSaveFirstPlaylist() {
   try {
     // Check if user already has playlists
-    const { data: existing } = await supabase
+    const { data: existing } = await supabaseClient
       .from('breathwork_playlists')
       .select('id')
       .eq('user_id', currentUser.id)
@@ -3484,7 +3484,7 @@ async function autoSaveFirstPlaylist() {
     if (existing && existing.length > 0) return;
     
     // Get videos from breathwork_videos table
-    const { data: videos } = await supabase
+    const { data: videos } = await supabaseClient
       .from('breathwork_videos')
       .select('*')
       .eq('user_id', currentUser.id)
@@ -3498,7 +3498,7 @@ async function autoSaveFirstPlaylist() {
       day_number: v.day_number
     }));
     
-    await supabase
+    await supabaseClient
       .from('breathwork_playlists')
       .insert([{
         user_id: currentUser.id,
@@ -3525,7 +3525,7 @@ async function loadHistoryPage() {
 async function loadLifetimeStats() {
   try {
     // Get all cycles
-    const { data: cycles } = await supabase
+    const { data: cycles } = await supabaseClient
       .from('challenge_cycles')
       .select('*')
       .eq('user_id', currentUser.id)
@@ -3548,7 +3548,7 @@ async function loadLifetimeStats() {
     const successRate = totalCycles > 0 ? Math.round((completedCycles / totalCycles) * 100) : 0;
     
     // Get total days completed across all cycles
-    const { data: completions } = await supabase
+    const { data: completions } = await supabaseClient
       .from('daily_summary')
       .select('date')
       .eq('user_id', currentUser.id)
@@ -3577,7 +3577,7 @@ async function loadLifetimeStats() {
 
 async function calculateLongestStreakEver() {
   try {
-    const { data: summaries } = await supabase
+    const { data: summaries } = await supabaseClient
       .from('daily_summary')
       .select('date, is_complete')
       .eq('user_id', currentUser.id)
@@ -3622,7 +3622,7 @@ async function calculateLongestStreakEver() {
 async function loadHistoricalCycles() {
   try {
     // Get all cycles with related data
-    const { data: cycles, error } = await supabase
+    const { data: cycles, error } = await supabaseClient
       .from('challenge_cycles')
       .select(`
         *,
@@ -3812,7 +3812,7 @@ async function renderCycleCalendar(cycle, container) {
   const totalDays = Math.min(diffDays + 1, 30);
   
   // Get completion data for this date range
-  const { data: summaries } = await supabase
+  const { data: summaries } = await supabaseClient
     .from('daily_summary')
     .select('date, is_complete, was_missed')
     .eq('user_id', currentUser.id)
@@ -3874,14 +3874,14 @@ async function renderCycleCalendar(cycle, container) {
 
 async function showDayDetails(cycle, dayNum, dayKey) {
   // Get blocks for this cycle
-  const { data: blocks } = await supabase
+  const { data: blocks } = await supabaseClient
     .from('routine_blocks')
     .select('*')
     .eq('user_id', currentUser.id)
     .order('order');
   
   // Get completions for this day
-  const { data: completions } = await supabase
+  const { data: completions } = await supabaseClient
     .from('daily_completions')
     .select('block_id')
     .eq('user_id', currentUser.id)
@@ -3890,7 +3890,7 @@ async function showDayDetails(cycle, dayNum, dayKey) {
   const completedIds = new Set(completions ? completions.map(c => c.block_id) : []);
   
   // Get summary for this day
-  const { data: summary } = await supabase
+  const { data: summary } = await supabaseClient
     .from('daily_summary')
     .select('*')
     .eq('user_id', currentUser.id)
