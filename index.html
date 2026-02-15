@@ -225,6 +225,359 @@
 
   </div>
 
+  <!-- ░░ HISTORY ░░ -->
+  <div id="view-history" class="view hidden">
+    <header class="dash-header">
+      <div>
+        <h1 class="dash-title">HISTORY</h1>
+        <p class="dash-sub">All your 30-day challenges</p>
+      </div>
+    </header>
+
+    <!-- Lifetime Stats -->
+    <div class="stats-cards" id="history-lifetime-stats">
+      <div class="stat-card">
+        <div class="stat-card-icon">🏆</div>
+        <div class="stat-card-value" id="lifetime-total-cycles">—</div>
+        <div class="stat-card-label">Total Cycles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">✅</div>
+        <div class="stat-card-value" id="lifetime-completed-cycles">—</div>
+        <div class="stat-card-label">Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">📊</div>
+        <div class="stat-card-value" id="lifetime-success-rate">—%</div>
+        <div class="stat-card-label">Success Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">🔥</div>
+        <div class="stat-card-value" id="lifetime-longest-streak">—</div>
+        <div class="stat-card-label">Best Streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">📅</div>
+        <div class="stat-card-value" id="lifetime-total-days">—</div>
+        <div class="stat-card-label">Total Days</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon">↺</div>
+        <div class="stat-card-value" id="lifetime-total-resets">—</div>
+        <div class="stat-card-label">Total Resets</div>
+      </div>
+    </div>
+
+    <!-- Cycles List -->
+    <section class="history-section">
+      <h3 class="section-title">YOUR CYCLES</h3>
+      <div id="history-cycles-container">
+        <div class="empty-state" id="history-cycles-empty">
+          <p style="color: var(--c-text-muted); text-align: center; padding: 2rem 0;">
+            No cycles yet. Complete onboarding to start your first cycle!
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ░░ CYCLE DETAIL MODAL ░░ -->
+  <div id="modal-cycle-detail" class="modal-overlay hidden" role="dialog">
+    <div class="modal-card modal-cycle-card">
+      <button class="modal-close" id="btn-close-cycle-detail" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div class="modal-cycle-header">
+        <h2 class="modal-title" id="cycle-detail-title">Cycle Details</h2>
+        <span id="cycle-detail-badge" class="cycle-status-badge"></span>
+      </div>
+      <div id="cycle-detail-meta" class="cycle-detail-meta"></div>
+      
+      <!-- Calendar for this cycle -->
+      <div class="calendar-section">
+        <h3 class="section-title">CALENDAR</h3>
+        <div class="calendar-legend">
+          <div class="legend-item"><span class="legend-dot completed"></span>Completed</div>
+          <div class="legend-item"><span class="legend-dot missed-continue"></span>Missed</div>
+          <div class="legend-item"><span class="legend-dot missed-restart"></span>Restarted</div>
+          <div class="legend-item"><span class="legend-dot future"></span>Not Reached</div>
+        </div>
+        <div id="cycle-detail-calendar" class="calendar-grid" role="grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ PARTNERS ░░ -->
+  <div id="view-partners" class="view hidden">
+    <header class="dash-header">
+      <div>
+        <h1 class="dash-title">PARTNERS</h1>
+        <p class="dash-sub">Accountability & motivation</p>
+      </div>
+    </header>
+
+    <!-- Current Partner -->
+    <section class="partner-section" id="partner-current-section">
+      <h3 class="section-title">YOUR PARTNER</h3>
+      
+      <!-- No Partner State -->
+      <div id="partner-empty-state" class="card">
+        <div class="empty-state">
+          <p style="margin-bottom: 1rem;">You don't have an accountability partner yet.</p>
+          <button class="btn btn-primary" id="btn-invite-partner">+ Invite Partner</button>
+        </div>
+      </div>
+      
+      <!-- Partner Card -->
+      <div id="partner-card" class="card partner-card hidden">
+        <div class="partner-header">
+          <div class="partner-info">
+            <div class="partner-email" id="partner-email">partner@example.com</div>
+            <div class="partner-since" id="partner-since">Partners since Jan 1, 2026</div>
+          </div>
+          <button class="btn btn-danger btn-sm" id="btn-remove-partner">Remove</button>
+        </div>
+        
+        <div class="partner-stats">
+          <div class="partner-stat">
+            <span class="partner-stat-label">Current Day</span>
+            <span class="partner-stat-value" id="partner-day">—</span>
+          </div>
+          <div class="partner-stat">
+            <span class="partner-stat-label">Streak</span>
+            <span class="partner-stat-value" id="partner-streak">🔥 —</span>
+          </div>
+          <div class="partner-stat">
+            <span class="partner-stat-label">Today's Progress</span>
+            <span class="partner-stat-value" id="partner-progress">—%</span>
+          </div>
+        </div>
+        
+        <div class="partner-status" id="partner-status">
+          <span class="partner-status-icon">⏳</span>
+          <span class="partner-status-text">Waiting for today's update...</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pending Invites -->
+    <section class="partner-section" id="partner-invites-section" style="display: none;">
+      <h3 class="section-title">PENDING INVITES</h3>
+      
+      <div id="partner-invites-container">
+        <!-- Invite cards will be inserted here -->
+      </div>
+    </section>
+
+    <!-- Notifications -->
+    <section class="partner-section">
+      <h3 class="section-title">NOTIFICATIONS</h3>
+      
+      <div id="partner-notifications-container">
+        <div class="empty-state" id="notifications-empty">
+          <p style="color: var(--c-text-muted);">No notifications yet</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ░░ SETTINGS ░░ -->
+  <div id="view-settings" class="view hidden">
+    <header class="dash-header">
+      <div>
+        <h1 class="dash-title">SETTINGS</h1>
+        <p class="dash-sub">Manage your account</p>
+      </div>
+    </header>
+
+    <!-- Account Section -->
+    <section class="settings-section">
+      <h3 class="settings-section-title">Account</h3>
+      <div class="card settings-card">
+        <div class="settings-row">
+          <span class="settings-label">Email</span>
+          <span class="settings-value" id="settings-email">—</span>
+        </div>
+        <div class="settings-row">
+          <button class="btn btn-ghost btn-full" id="btn-change-password">Change Password</button>
+        </div>
+        <div class="settings-row">
+          <button class="btn btn-ghost btn-full" id="btn-settings-logout">Sign Out</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Routine Settings Section (Placeholder) -->
+    <section class="settings-section">
+      <h3 class="settings-section-title">Routine Settings</h3>
+      <div class="card settings-card">
+        <p style="color: var(--c-text-muted); padding: 1rem;">
+          Manage your morning routine
+        </p>
+      </div>
+    </section>
+
+    <!-- My Routines Section -->
+    <section class="settings-section">
+      <h3 class="settings-section-title">My Routines</h3>
+      <button class="btn btn-primary btn-full" id="btn-create-template" style="margin-bottom: 1rem;">
+        + Create New Routine
+      </button>
+      <div id="templates-container">
+        <!-- Template cards will be inserted here -->
+        <div class="empty-state hidden" id="templates-empty">
+          <p style="color: var(--c-text-muted); text-align: center; padding: 2rem 0;">
+            No routine templates yet. Create your first one!
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- My Playlists Section -->
+    <section class="settings-section">
+      <h3 class="settings-section-title">My Playlists</h3>
+      
+      <!-- Playlist Tabs -->
+      <div class="playlist-tabs">
+        <button class="playlist-tab active" data-tab="personal">My Playlists</button>
+        <button class="playlist-tab" data-tab="community">Community</button>
+      </div>
+      
+      <!-- Personal Playlists Tab -->
+      <div id="playlists-personal" class="playlist-tab-content active">
+        <button class="btn btn-primary btn-full" id="btn-create-playlist" style="margin-bottom: 1rem;">
+          + Create New Playlist
+        </button>
+        <div id="personal-playlists-container">
+          <div class="empty-state hidden" id="personal-playlists-empty">
+            <p style="color: var(--c-text-muted); text-align: center; padding: 2rem 0;">
+              No playlists yet. Create your first one!
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Community Playlists Tab -->
+      <div id="playlists-community" class="playlist-tab-content hidden">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <input type="text" id="community-search" placeholder="Search community playlists..." style="margin: 0;">
+        </div>
+        <div id="community-playlists-container">
+          <div class="empty-state" id="community-playlists-empty">
+            <p style="color: var(--c-text-muted); text-align: center; padding: 2rem 0;">
+              Loading community playlists...
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Partner Section -->
+    <section class="settings-section">
+      <h3 class="settings-section-title">Partner</h3>
+      <div class="card settings-card">
+        <div class="settings-row">
+          <span class="settings-label">Partner Email</span>
+          <span class="settings-value" id="settings-partner-email">No partner</span>
+        </div>
+        <div class="settings-row">
+          <button class="btn btn-ghost btn-full" id="btn-settings-manage-partner">Manage Partner</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Danger Zone -->
+    <section class="settings-section">
+      <h3 class="settings-section-title settings-section-danger">Danger Zone</h3>
+      <div class="card settings-card-danger">
+        <button class="btn btn-danger btn-full" id="btn-delete-account">Delete Account</button>
+        <p style="color: var(--c-text-dim); font-size: 0.75rem; margin-top: 0.5rem; text-align: center;">
+          This will permanently delete all your data
+        </p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ░░ BOTTOM NAVIGATION ░░ -->
+  <nav id="bottom-nav" class="bottom-nav hidden">
+    <button class="nav-tab active" data-view="dashboard">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="nav-tab" data-view="history">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      <span>History</span>
+    </button>
+    <button class="nav-tab" data-view="partners">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <span>Partners</span>
+    </button>
+    <button class="nav-tab" data-view="settings">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 1v6m0 6v6m0-14l-2.7 2.7m0 8.6L12 13m0 0l2.7-2.7m0-8.6L12 13"/>
+      </svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <!-- ░░ CHANGE PASSWORD MODAL ░░ -->
+  <div id="modal-change-password" class="modal-overlay hidden" role="dialog">
+    <div class="modal-card">
+      <h2 class="modal-title">Change Password</h2>
+      <div id="change-password-error" class="error-msg hidden"></div>
+      <div id="change-password-success" class="success-msg hidden"></div>
+      <div class="form-group">
+        <label for="new-password">New Password</label>
+        <input type="password" id="new-password" placeholder="Min 6 characters" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label for="confirm-password">Confirm Password</label>
+        <input type="password" id="confirm-password" placeholder="Re-enter password">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-full" id="btn-cancel-password">Cancel</button>
+        <button class="btn btn-primary btn-full" id="btn-save-password">Save Password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ DELETE ACCOUNT MODAL ░░ -->
+  <div id="modal-delete-account" class="modal-overlay hidden" role="dialog">
+    <div class="modal-card">
+      <div class="modal-icon">⚠️</div>
+      <h2 class="modal-title">Delete Account?</h2>
+      <p class="modal-body">
+        This will permanently delete:<br>
+        • All your routines and progress<br>
+        • All breathwork videos<br>
+        • All cycle history<br>
+        • Your account data<br><br>
+        <strong>This cannot be undone.</strong>
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-full" id="btn-cancel-delete">Cancel</button>
+        <button class="btn btn-danger btn-full" id="btn-confirm-delete">Delete Everything</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ░░ MISSED DAY MODAL ░░ -->
   <div id="modal-missed-day" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-missed-title">
     <div class="modal-card" role="document">
@@ -260,6 +613,254 @@
       <div class="modal-day-date" id="modal-day-date">—</div>
       <div class="modal-day-status" id="modal-day-status">—</div>
       <div class="modal-day-blocks" id="modal-day-blocks"></div>
+    </div>
+  </div>
+
+  <!-- ░░ CREATE/EDIT TEMPLATE MODAL ░░ -->
+  <div id="modal-template" class="modal-overlay hidden" role="dialog">
+    <div class="modal-card modal-template-card">
+      <button class="modal-close" id="btn-close-template" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <h2 class="modal-title" id="modal-template-title">Create Routine</h2>
+      <div id="template-error" class="error-msg hidden"></div>
+      
+      <div class="form-group">
+        <label for="template-name">Routine Name</label>
+        <input type="text" id="template-name" placeholder="e.g., Heavy Workout Routine" maxlength="50">
+      </div>
+      
+      <div class="form-group">
+        <label for="template-arrival">Arrival Time</label>
+        <input type="time" id="template-arrival" value="09:00">
+      </div>
+      
+      <div class="form-group">
+        <label>Routine Blocks</label>
+        <div id="template-blocks-list" class="template-blocks-list">
+          <!-- Blocks will be inserted here -->
+        </div>
+        <button class="btn btn-ghost btn-full" id="btn-add-template-block">
+          + Add Block
+        </button>
+      </div>
+      
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-full" id="btn-cancel-template">Cancel</button>
+        <button class="btn btn-primary btn-full" id="btn-save-template">Save Routine</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ ADD/EDIT BLOCK MODAL ░░ -->
+  <div id="modal-block" class="modal-overlay hidden" role="dialog">
+    <div class="modal-card">
+      <h2 class="modal-title" id="modal-block-title">Add Block</h2>
+      <div id="block-error" class="error-msg hidden"></div>
+      
+      <div class="form-group">
+        <label for="block-name">Block Name</label>
+        <input type="text" id="block-name" placeholder="e.g., HIIT Sprints" maxlength="50">
+      </div>
+      
+      <div class="form-group">
+        <label for="block-type">Type</label>
+        <select id="block-type">
+          <option value="workout">Workout</option>
+          <option value="wellness">Wellness</option>
+          <option value="mindset">Mindset</option>
+          <option value="hygiene">Hygiene</option>
+          <option value="food">Food</option>
+          <option value="travel">Travel</option>
+          <option value="breathwork">Breathwork</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>
+          <input type="radio" name="block-duration-type" value="time" checked> Duration (minutes)
+        </label>
+        <input type="number" id="block-duration" min="1" max="180" value="10">
+      </div>
+      
+      <div class="form-group">
+        <label>
+          <input type="radio" name="block-duration-type" value="reps"> Sets & Reps
+        </label>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="number" id="block-sets" min="1" max="100" placeholder="Sets" disabled>
+          <span style="align-self: center;">×</span>
+          <input type="number" id="block-reps-per-set" min="1" max="100" placeholder="Reps" disabled>
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-full" id="btn-cancel-block">Cancel</button>
+        <button class="btn btn-primary btn-full" id="btn-save-block">Save Block</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ APPLY TEMPLATE CONFIRMATION ░░ -->
+  <div id="modal-apply-template" class="modal-overlay hidden" role="dialog">
+    <div class="modal-card">
+      <div class="modal-icon">⚠️</div>
+      <h2 class="modal-title">Switch Routine?</h2>
+      <p class="modal-body" id="apply-template-message">
+        Switching to "<span id="apply-template-name"></span>" will save your current routine as a template and restart your 30-day cycle.
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-full" id="btn-cancel-apply">Cancel</button>
+        <button class="btn btn-primary btn-full" id="btn-confirm-apply">Switch Routine</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ DELETE TEMPLATE CONFIRMATION ░░ -->
+  <div id="modal-delete-template" class="modal-overlay hidden" role="dialog">
+    <div class="modal-card">
+      <div class="modal-icon">🗑️</div>
+      <h2 class="modal-title">Delete Routine?</h2>
+      <p class="modal-body">
+        Delete "<span id="delete-template-name"></span>"?<br>
+        This cannot be undone.
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-full" id="btn-cancel-delete-template">Cancel</button>
+        <button class="btn btn-danger btn-full" id="btn-confirm-delete-template">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ CREATE/EDIT PLAYLIST MODAL ░░ -->
+  <div id="modal-playlist" class="modal-overlay hidden" role="dialog">
+    <div class="modal-card modal-playlist-card">
+      <button class="modal-close" id="btn-close-playlist" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <h2 class="modal-title" id="modal-playlist-title">Create Playlist</h2>
+      <div id="playlist-error" class="error-msg hidden"></div>
+      
+      <div class="form-group">
+        <label for="playlist-name">Playlist Name</label>
+        <input type="text" id="playlist-name" placeholder="e.g., Wim Hof 30-Day Series" maxlength="50">
+      </div>
+      
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="playlist-public"> Make this playlist public
+        </label>
+        <p style="font-size: 0.75rem; color: var(--c-text-dim); margin-top: 0.25rem;">
+          Others will be able to see and use this playlist
+        </p>
+      </div>
+      
+      <div class="form-group">
+        <label for="playlist-urls">
+          YouTube URLs (30 videos)
+          <span class="label-count" id="playlist-url-count">0 / 30</span>
+        </label>
+        <textarea
+          id="playlist-urls"
+          rows="10"
+          placeholder="https://youtube.com/watch?v=abc123&#10;https://youtu.be/xyz456&#10;…one URL per line, exactly 30 URLs"
+        ></textarea>
+      </div>
+      
+      <div id="playlist-parse-preview" class="url-parse-preview hidden"></div>
+      
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-full" id="btn-cancel-playlist">Cancel</button>
+        <button class="btn btn-primary btn-full" id="btn-save-playlist">Save Playlist</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ PLAYLIST PREVIEW MODAL ░░ -->
+  <div id="modal-playlist-preview" class="modal-overlay hidden" role="dialog">
+    <div class="modal-card modal-playlist-preview-card">
+      <button class="modal-close" id="btn-close-playlist-preview" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <h2 class="modal-title" id="preview-playlist-name">Playlist Preview</h2>
+      <p id="preview-playlist-meta" style="color: var(--c-text-dim); font-size: 0.85rem; margin-bottom: 1rem;"></p>
+      
+      <div id="preview-videos-grid" class="preview-videos-grid">
+        <!-- Video thumbnails will be inserted here -->
+      </div>
+      
+      <div class="modal-actions" id="preview-actions">
+        <!-- Action button will be inserted here (Use This / Close) -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ DELETE PLAYLIST CONFIRMATION ░░ -->
+  <div id="modal-delete-playlist" class="modal-overlay hidden" role="dialog">
+    <div class="modal-card">
+      <div class="modal-icon">🗑️</div>
+      <h2 class="modal-title">Delete Playlist?</h2>
+      <p class="modal-body">
+        Delete "<span id="delete-playlist-name"></span>"?<br>
+        This cannot be undone.
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-full" id="btn-cancel-delete-playlist">Cancel</button>
+        <button class="btn btn-danger btn-full" id="btn-confirm-delete-playlist">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ INVITE PARTNER MODAL ░░ -->
+  <div id="modal-invite-partner" class="modal-overlay hidden" role="dialog">
+    <div class="modal-card">
+      <h2 class="modal-title">Invite Partner</h2>
+      <div id="invite-partner-error" class="error-msg hidden"></div>
+      <div id="invite-partner-success" class="success-msg hidden"></div>
+      
+      <p style="color: var(--c-text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+        Invite someone to be your accountability partner. They'll see your:
+      </p>
+      <ul style="color: var(--c-text-dim); font-size: 0.85rem; margin-bottom: 1.5rem; padding-left: 1.5rem;">
+        <li>Current day and streak</li>
+        <li>Today's completion percentage</li>
+        <li>Notifications when you complete or miss a day</li>
+      </ul>
+      <p style="color: var(--c-text-dim); font-size: 0.85rem; margin-bottom: 1.5rem;">
+        They will <strong>NOT</strong> see your specific workout details.
+      </p>
+      
+      <div class="form-group">
+        <label for="partner-email">Partner's Email</label>
+        <input type="email" id="partner-email-input" placeholder="partner@example.com" autocomplete="email">
+      </div>
+      
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-full" id="btn-cancel-invite">Cancel</button>
+        <button class="btn btn-primary btn-full" id="btn-send-invite">Send Invite</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ REMOVE PARTNER CONFIRMATION ░░ -->
+  <div id="modal-remove-partner" class="modal-overlay hidden" role="dialog">
+    <div class="modal-card">
+      <div class="modal-icon">⚠️</div>
+      <h2 class="modal-title">Remove Partner?</h2>
+      <p class="modal-body">
+        Remove <strong><span id="remove-partner-email"></span></strong> as your accountability partner?<br><br>
+        You'll both stop seeing each other's progress and notifications.
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-full" id="btn-cancel-remove-partner">Cancel</button>
+        <button class="btn btn-danger btn-full" id="btn-confirm-remove-partner">Remove Partner</button>
+      </div>
     </div>
   </div>
 
