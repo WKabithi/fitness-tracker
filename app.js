@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────
 // 1. SUPABASE CLIENT
 // ─────────────────────────────────────────────
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ─────────────────────────────────────────────
 // 2. DEFAULT BLOCKS
