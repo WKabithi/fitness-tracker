@@ -206,7 +206,7 @@ async function checkAuth() {
 }
 
 async function afterLogin() {
-  const { data: profile } = await supabase
+  const { data: profile } = await supabaseClient
     .from("profiles")
     .select("arrival_time, onboarding_complete")
     .eq("user_id", currentUser.id)
